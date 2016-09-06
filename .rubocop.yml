@@ -1,0 +1,83 @@
+AllCops:
+  # TargetRubyVersion: 2.2
+  Include:
+    - Rakefile
+    - config.ru
+  Exclude:
+    - db/**/*
+    - lib/templates/rails/**/*.rb
+    - bin/*
+    - views/**/*
+    - config/environments/*.rb
+
+Metrics/ModuleLength:
+  Max: 350
+
+# Configuration parameters: AllowURI, URISchemes.
+Metrics/LineLength:
+  Max: 140
+
+Metrics/ClassLength:
+  Max: 350
+
+# Configuration parameters: CountComments.
+Metrics/MethodLength:
+  Max: 48
+
+# Missing top-level class documentation comment
+Style/Documentation:
+  Enabled: false
+
+# Assignment Branch Condition size for %s is too high. [%.4g/%.4g]
+Metrics/AbcSize:
+  Max: 52
+
+Metrics/CyclomaticComplexity:
+  Max: 12
+
+Metrics/PerceivedComplexity:
+  Max: 12
+
+Rails/HasAndBelongsToMany:
+  Exclude:
+    - 'app/models/contact.rb'
+
+######################################
+# temp, while updating to ruby 2.3
+######################################
+Style/MultilineMethodCallBraceLayout:
+  Enabled: false
+
+Style/MutableConstant:
+  Exclude:
+    - 'app/controllers/concerns/adjustment_excel_builder.rb'
+    - 'app/controllers/concerns/package_list_excel_builder.rb'
+    - 'app/controllers/concerns/purchase_excel_builder.rb'
+    - 'app/controllers/concerns/purchase_order_excel_builder.rb'
+    - 'app/controllers/concerns/sisconta_export.rb'
+    - 'app/controllers/concerns/table_formatted_excel_builder.rb'
+    - 'app/ext/sceti_receipt_printing.rb'
+    - 'app/helpers/application_helper.rb'
+    - 'app/models/concerns/contact_selectable_reports.rb'
+    - 'app/models/concerns/fso_labels.rb'
+    - 'app/models/concerns/item_selectable_reports.rb'
+    - 'app/models/concerns/purchase_order_selectable_reports.rb'
+    - 'spec/requests/contacts_spec.rb'
+
+Style/IndentArray:
+  Exclude:
+    - 'spec/models/adjustment_spec.rb'
+    - 'spec/models/contact_spec.rb'
+    - 'spec/models/purchase_item_detail_spec.rb'
+    - 'spec/models/purchase_order_item_detail_spec.rb'
+    - 'spec/models/purchase_order_spec.rb'
+    - 'spec/models/purchase_spec.rb'
+    - 'spec/views/banners/index.html.erb_spec.rb'
+    - 'spec/views/color_libraries/index.html.erb_spec.rb'
+    - 'spec/views/colors/index.html.erb_spec.rb'
+    - 'spec/views/payment_methods/index.html.erb_spec.rb'
+    - 'spec/views/sequences/index.html.erb_spec.rb'
+    - 'spec/views/size_libraries/index.html.erb_spec.rb'
+    - 'spec/views/sizes/index.html.erb_spec.rb'
+    - 'spec/views/stamping_libraries/index.html.erb_spec.rb'
+    - 'spec/views/stampings/index.html.erb_spec.rb'

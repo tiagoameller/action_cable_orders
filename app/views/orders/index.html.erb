@@ -1,0 +1,39 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Orders</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Created at</th>
+      <th colspan="2"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @orders.each do |order| %>
+      <tr>
+        <td><%= order.name %></td>
+        <td><%= order.created_at %></td>
+      </tr>
+      <tr>
+        <td>Plu</td>
+        <td>Units</td>
+      </tr>
+      <% order.order_items.each do |order_item| %>
+        <tr>
+          <td><%= order_item.plu.name %></td>
+          <td><%= order_item.units %></td>
+        </tr>
+      <% end %>
+      <tr>
+        <td colspan="2">
+          <%= form_tag(order_serviced_path(order), method: :post) do  %>
+            <%= submit_tag 'Serviced' %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

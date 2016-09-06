@@ -1,0 +1,50 @@
+<%= form_for(order) do |f| %>
+  <% if order.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= orderralize(order.errors.count, "error") %> prohibited this order from being saved:</h2>
+
+      <ul>
+      <% order.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :name %>
+    <%= f.text_field :name %>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Price</th>
+        <th colspan="3"></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% @plus.each do |plu| %>
+        <tr>
+          <td><%= plu.name %></td>
+          <td><%= plu.price %></td>
+          <td>
+            <input type="button" name="plus" value="+" id="js-plus-<%= plu.id %>" class='js-plus-btn'>
+          </td>
+          <td>
+            <input type="button" name="minus" value="-" id="js-minus-<%= plu.id %>" class='js-minus-btn'>
+          </td>
+          <td>
+            <input type="number" name="units" value="0" id="js-units-<%= plu.id %>" class='js-units-btn'>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <div class="actions">
+   <%= f.submit %>
+  </div>
+<% end %>

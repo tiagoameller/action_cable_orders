@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @plu.name %>
+</p>
+
+<p>
+  <strong>Price:</strong>
+  <%= @plu.price %>
+</p>
+
+<p>
+  <strong>Units:</strong>
+  <%= @plu.units %>
+</p>
+
+<%= link_to 'Edit', edit_plu_path(@plu) %> |
+<%= link_to 'Back', plus_path %>

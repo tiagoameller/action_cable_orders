@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Plus</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Price</th>
+      <th colspan="2"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @plus.each do |plu| %>
+      <tr>
+        <td><%= plu.name %></td>
+        <td><%= plu.price %></td>
+        <td><%= link_to 'Show', plu %></td>
+        <td><%= link_to 'Edit', edit_plu_path(plu) %></td>
+        <td><%= link_to 'Destroy', plu, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Plu', new_plu_path %>
