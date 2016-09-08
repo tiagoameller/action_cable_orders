@@ -5,7 +5,7 @@ class OrderItem < ApplicationRecord
   validates :plu, presence: true
 
   after_initialize do |r|
-    r.units = 1 if new_record?
+    r.units = 1 if new_record? && r.units.nil?
   end
 
   def total

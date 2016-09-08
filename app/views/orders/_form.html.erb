@@ -1,7 +1,7 @@
-<%= form_for(order) do |f| %>
+<%= form_tag(orders_path, method: :post) do |f| %>
   <% if order.errors.any? %>
     <div id="error_explanation">
-      <h2><%= orderralize(order.errors.count, "error") %> prohibited this order from being saved:</h2>
+      <h2><%= pluralize(order.errors.count, "error") %> prohibited this order from being saved:</h2>
 
       <ul>
       <% order.errors.full_messages.each do |message| %>
@@ -12,8 +12,8 @@
   <% end %>
 
   <div class="field">
-    <%= f.label :name %>
-    <%= f.text_field :name %>
+    <%= label_tag 'Your name:' %>
+    <%= text_field_tag 'order[name]' %>
   </div>
 
   <table>
@@ -31,13 +31,18 @@
           <td><%= plu.name %></td>
           <td><%= plu.price %></td>
           <td>
-            <input type="button" name="plus" value="+" id="js-plus-<%= plu.id %>" class='js-plus-btn'>
+            <button type="button" name="plus" id="js-plus-<%= plu.id %>" class='js-plus-btn'>+</button>
           </td>
           <td>
-            <input type="button" name="minus" value="-" id="js-minus-<%= plu.id %>" class='js-minus-btn'>
+            <button type="button" name="minus" id="js-minus-<%= plu.id %>" class='js-minus-btn'>-</button>
           </td>
           <td>
-            <input type="number" name="units" value="0" id="js-units-<%= plu.id %>" class='js-units-btn'>
+            <%= number_field_tag(
+              "items[#{plu.id}]",
+              0,
+              id: "js-units-#{plu.id}",
+              class: 'js-units-btn',
+              min: 0) %>
           </td>
         </tr>
       <% end %>
@@ -45,6 +50,26 @@
   </table>
 
   <div class="actions">
-   <%= f.submit %>
+   <%= submit_tag 'Create Order' %>
   </div>
 <% end %>
+
+<script type="text/javascript">
+  $('.js-plus-btn').on('click', function(e) {
+    addUnits(e, 'plus');
+  });
+
+  $('.js-minus-btn').on('click', function(e) {
+    addUnits(e, 'minus');
+  });
+
+  function addUnits(e, operation) {
+    var units_name = $(e.target).attr('id').replace('js-'+operation+'-', 'js-units-');
+    units_text = $('#'+units_name);
+    units = parseInt(units_text.val(), 10);
+    if (operation === 'plus')
+      units_text.val(++units);
+    else
+      units_text.val(--units);
+  }
+</script>

@@ -12,10 +12,10 @@ class OrdersController < ApplicationController
     @order = Order.new(order_params)
     respond_to do |format|
       if @order.save
-        # TODO: remove this
-        @order.order_items.create(plu: Plu.first)
-        @order.order_items.create(plu: Plu.last)
-        # TODO: remove this
+
+        params[:items].each do |k, v|
+          @order.order_items.create(plu: Plu.find(k.to_i), units: v.to_i) unless v == '0'
+        end
 
         ActionCable.server.broadcast(
           'server_notifications',
@@ -26,6 +26,7 @@ class OrdersController < ApplicationController
         format.html { redirect_to @order, notice: 'Order was successfully created.' }
         format.json { render :show, status: :created, location: @order }
       else
+        @plus = Plu.all
         format.html { render :new }
         format.json { render json: @order.errors, status: :unprocessable_entity }
       end
