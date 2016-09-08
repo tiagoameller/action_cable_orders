@@ -1,7 +1,7 @@
 <script type="text/javascript">
   App.server_notifications = App.cable.subscriptions.create('ServerNotificationsChannel', {
     received: function(data) {
-      if ((data.kind === 'new_order') && (<%= (action_name == 'index' ? true : false) %>)) {
+      if (data.kind === 'new_order') {
        location.reload();
       }
     }
@@ -24,7 +24,7 @@
   <tbody>
     <% @orders.each do |order| %>
       <tr>
-        <td><%= order.name %></td>
+        <td><%= order.id %> <%= order.name %></td>
         <td><%= order.created_at %></td>
       </tr>
       <tr>
