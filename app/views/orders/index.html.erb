@@ -1,3 +1,13 @@
+<script type="text/javascript">
+  App.server_notifications = App.cable.subscriptions.create('ServerNotificationsChannel', {
+    received: function(data) {
+      if ((data.kind === 'new_order') && (<%= (action_name == 'index' ? true : false) %>)) {
+       location.reload();
+      }
+    }
+  });
+</script>
+
 <p id="notice"><%= notice %></p>
 
 <h1>Orders</h1>

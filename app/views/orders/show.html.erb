@@ -1,6 +1,20 @@
+<script type="text/javascript">
+  App.client_notifications = App.cable.subscriptions.create('ClientNotificationsChannel', {
+    received: function(data) {
+      if ((data.kind === 'serviced_order') && (data.order_id === <%= (@order.present? ? @order.id : 0) %>)) {
+        $("#notifications").removeClass('hidden');
+      }
+    }
+  });
+</script>
+
 <p id="notice"><%= notice %></p>
 
 <h1>Please wait until your order is processed</h1>
+
+<h2 id="notifications" class="hidden">
+  Congrats! you can pick your order now!
+</h2>
 
 <p>
   <strong>Name:</strong>

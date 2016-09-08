@@ -17,7 +17,13 @@ class OrdersController < ApplicationController
         @order.order_items.create(plu: Plu.last)
         # TODO: remove this
 
-        format.html { redirect_to @order, notice: 'Plu was successfully created.' }
+        ActionCable.server.broadcast(
+          'server_notifications',
+          kind: :new_order,
+          order_id: @order.id
+        )
+
+        format.html { redirect_to @order, notice: 'Order was successfully created.' }
         format.json { render :show, status: :created, location: @order }
       else
         format.html { render :new }
@@ -32,7 +38,12 @@ class OrdersController < ApplicationController
 
   def serviced
     @order = Order.find(params[:order_id])
-    # TODO: notify to customer
+    ActionCable.server.broadcast(
+      'client_notifications',
+      kind: :serviced_order,
+      order_id: @order.id
+    )
+
     @order.update_attributes(serviced: true)
 
     @orders = Order.not_serviced.order(:id)
