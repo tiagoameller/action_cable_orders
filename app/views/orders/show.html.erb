@@ -3,6 +3,15 @@
     received: function(data) {
       if ((data.kind === 'serviced_order') && (data.order_id === <%= (@order.present? ? @order.id : 0) %>)) {
         $("#notifications").removeClass('hidden');
+        this.tryVibrate();
+      }
+    },
+    tryVibrate: function() {
+      if("vibrate" in navigator) {
+        navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
+        if (navigator.vibrate)
+          navigator.vibrate([100, 200, 300])
+        ;
       }
     }
   });
@@ -48,3 +57,5 @@
     <% end %>
   </tbody>
 </table>
+
+<a href="<%= new_order_path %>">Make new order</a>
