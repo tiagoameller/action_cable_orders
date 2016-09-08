@@ -2,7 +2,8 @@
   App.client_notifications = App.cable.subscriptions.create('ClientNotificationsChannel', {
     received: function(data) {
       if ((data.kind === 'serviced_order') && (data.order_id === <%= (@order.present? ? @order.id : 0) %>)) {
-        $("#notifications").removeClass('hidden');
+        $(".notifications").removeClass('hidden');
+        $(".in_progress").addClass('hidden');
         this.tryVibrate();
       }
     },
@@ -21,7 +22,7 @@
 
 <h1>Please wait until your order is processed</h1>
 
-<h2 id="notifications" class="hidden">
+<h2 class="notifications hidden serviced">
   Congrats! you can pick your order now!
 </h2>
 
@@ -30,9 +31,14 @@
   <%= @order.name %>
 </p>
 <p>
-  <strong>Received:</strong>
-  <%= @order.created_at %>
+  <strong>Ordered:</strong>
+  <%= time_ago_in_words @order.created_at %> ago
 </p>
+<% if @order.serviced %>
+  <p class="serviced">SERVICED <%= time_ago_in_words @order.updated_at %> ago </p>
+<% else %>
+  <p class="in_progress">IN PROGRESS</p>
+<% end %>
 
 <h2>TOTAL: <%= @order.total %></h2>
 
