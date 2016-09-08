@@ -5,4 +5,8 @@ class Order < ApplicationRecord
   validates :name, presence: true
 
   scope :not_serviced, -> { where('serviced = ?', false) }
+
+  def total
+    order_items.inject(0) { |a, e| a + e.total }
+  end
 end

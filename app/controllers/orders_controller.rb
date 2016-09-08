@@ -10,9 +10,13 @@ class OrdersController < ApplicationController
 
   def create
     @order = Order.new(order_params)
-
     respond_to do |format|
       if @order.save
+        # TODO: remove this
+        @order.order_items.create(plu: Plu.first)
+        @order.order_items.create(plu: Plu.last)
+        # TODO: remove this
+
         format.html { redirect_to @order, notice: 'Plu was successfully created.' }
         format.json { render :show, status: :created, location: @order }
       else

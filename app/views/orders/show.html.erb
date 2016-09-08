@@ -1,6 +1,36 @@
 <p id="notice"><%= notice %></p>
 
+<h1>Please wait until your order is processed</h1>
+
 <p>
   <strong>Name:</strong>
   <%= @order.name %>
 </p>
+<p>
+  <strong>Received:</strong>
+  <%= @order.created_at %>
+</p>
+
+<h2>TOTAL: <%= @order.total %></h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Price</th>
+      <th>Units</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @order.order_items.each do |order_item| %>
+      <tr>
+        <td><%= order_item.plu.name %></td>
+        <td><%= order_item.plu.price %></td>
+        <td><%= order_item.units %></td>
+        <td><%= order_item.total %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
