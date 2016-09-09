@@ -53,23 +53,3 @@
    <%= submit_tag 'Create Order' %>
   </div>
 <% end %>
-
-<script type="text/javascript">
-  $('.js-plus-btn').on('click', function(e) {
-    addUnits(e, 'plus');
-  });
-
-  $('.js-minus-btn').on('click', function(e) {
-    addUnits(e, 'minus');
-  });
-
-  function addUnits(e, operation) {
-    var units_name = $(e.target).attr('id').replace('js-'+operation+'-', 'js-units-');
-    units_text = $('#'+units_name);
-    units = parseInt(units_text.val(), 10);
-    if (operation === 'plus')
-      units_text.val(++units);
-    else
-      units_text.val(--units);
-  }
-</script>
