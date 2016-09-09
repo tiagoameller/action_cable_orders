@@ -25,7 +25,7 @@
             <% order.order_items.each do |order_item| %>
               <tr>
                 <td><%= order_item.plu.name %></td>
-                <td><%= order_item.units %></td>
+                <td class="text-center"><%= order_item.units %></td>
               </tr>
             <% end %>
           </tbody>

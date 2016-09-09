@@ -4,14 +4,14 @@
 
 <div class="row">
   <div class="small-12-columns">
-    <div class="callout primary js-in_progress">
+    <div class="callout primary js-in_progress <%= (@order.serviced? ? 'hidden' : '') %>">
       <h2>Your order is been processed now</h2>
       <p>
         <h4 class="subheader">Please wait until notified</h4>
       </p>
     </div>
 
-    <div class="callout success hidden js-notification js-serviced">
+    <div class="callout success js-serviced <%= (@order.serviced? ? '' : 'hidden') %>">
       <h2>Congrats! you can pick your order now!</h2>
     </div>
   </div>
@@ -20,6 +20,10 @@
 <div class="row">
   <div class="small-12-columns">
     <p>
+      <strong>Order id:</strong>
+      <%= @order.id %>
+    </p>
+    <p>
       <strong>Your name:</strong>
       <%= @order.name %>
     </p>
@@ -27,15 +31,9 @@
       <strong>Ordered:</strong>
       <%= time_ago_in_words @order.created_at %> ago
     </p>
-    <% if @order.serviced %>
-      <p>
-        <span class="success label">SERVICED <%= time_ago_in_words @order.updated_at %> ago</span>
-      </p>
-    <% else %>
-      <p>
-        <span class="warning label">IN PROGRESS</span>
-      </p>
-    <% end %>
+    <p>
+      <span class="success label <%= (@order.serviced? ? '' : 'hidden') %>">SERVICED <%= time_ago_in_words @order.updated_at %> ago</span>
+    </p>
 
     <table>
       <thead>
@@ -51,9 +49,9 @@
         <% @order.order_items.each do |order_item| %>
           <tr>
             <td><%= order_item.plu.name %></td>
-            <td><%= order_item.plu.price %></td>
-            <td><%= order_item.units %></td>
-            <td><%= number_to_currency order_item.total %></td>
+            <td class="text-center"><%= order_item.plu.price %></td>
+            <td class="text-center"><%= order_item.units %></td>
+            <td class="text-right"><%= number_to_currency order_item.total %></td>
           </tr>
         <% end %>
       </tbody>
