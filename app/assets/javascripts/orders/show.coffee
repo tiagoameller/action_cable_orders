@@ -6,8 +6,8 @@ class App.OrdersShow
         'ClientNotificationsChannel',
         received: (data) ->
           if data.kind == 'serviced_order' and data.order_id == current_order
-            $('.notifications').removeClass 'hidden'
-            $('.in_progress').addClass 'hidden'
+            $('.js-notification').removeClass 'hidden'
+            $('.js-in_progress').addClass 'hidden'
             if 'vibrate' of navigator
               navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate
               navigator.vibrate([100, 200, 300]) if navigator.vibrate

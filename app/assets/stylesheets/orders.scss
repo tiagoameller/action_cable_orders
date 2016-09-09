@@ -5,21 +5,19 @@
   display: none;
 }
 
-.serviced {
-  color: green;
-}
-
-.in_progress {
-  color: orange;
-}
-
 p {
   margin: 8px !important;
 }
 
 input[type="number"] {
-  width: 36px;
   margin: 0;
+}
+
+@media screen and (max-width: 39.9375em) {
+  input[type="number"] {
+    width: 36px;
+    margin: 0;
+  }
 }
 
 .row.column hr {

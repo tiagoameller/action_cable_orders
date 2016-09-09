@@ -2,50 +2,65 @@
   current_order = <%= (@order.present? ? @order.id : 0) %>
 </script>
 
-<p id="notice"><%= notice %></p>
+<div class="row">
+  <div class="small-12-columns">
+    <div class="callout primary js-in_progress">
+      <h2>Your order is been processed now</h2>
+      <p>
+        <h4 class="subheader">Please wait until notified</h4>
+      </p>
+    </div>
 
-<h1>Please wait until your order is processed</h1>
+    <div class="callout success hidden js-notification js-serviced">
+      <h2>Congrats! you can pick your order now!</h2>
+    </div>
+  </div>
+</div>
 
-<h2 class="notifications hidden serviced">
-  Congrats! you can pick your order now!
-</h2>
-
-<p>
-  <strong>Your name:</strong>
-  <%= @order.name %>
-</p>
-<p>
-  <strong>Ordered:</strong>
-  <%= time_ago_in_words @order.created_at %> ago
-</p>
-<% if @order.serviced %>
-  <p class="serviced">SERVICED <%= time_ago_in_words @order.updated_at %> ago </p>
-<% else %>
-  <p class="in_progress">IN PROGRESS</p>
-<% end %>
-
-<h2>TOTAL: <%= @order.total %></h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Price</th>
-      <th>Units</th>
-      <th>Total</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <% @order.order_items.each do |order_item| %>
-      <tr>
-        <td><%= order_item.plu.name %></td>
-        <td><%= order_item.plu.price %></td>
-        <td><%= order_item.units %></td>
-        <td><%= order_item.total %></td>
-      </tr>
+<div class="row">
+  <div class="small-12-columns">
+    <p>
+      <strong>Your name:</strong>
+      <%= @order.name %>
+    </p>
+    <p>
+      <strong>Ordered:</strong>
+      <%= time_ago_in_words @order.created_at %> ago
+    </p>
+    <% if @order.serviced %>
+      <p>
+        <span class="success label">SERVICED <%= time_ago_in_words @order.updated_at %> ago</span>
+      </p>
+    <% else %>
+      <p>
+        <span class="warning label">IN PROGRESS</span>
+      </p>
     <% end %>
-  </tbody>
-</table>
 
-<a href="<%= new_order_path %>">Make new order</a>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Units</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% @order.order_items.each do |order_item| %>
+          <tr>
+            <td><%= order_item.plu.name %></td>
+            <td><%= order_item.plu.price %></td>
+            <td><%= order_item.units %></td>
+            <td><%= number_to_currency order_item.total %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <h2 class="text-right">TOTAL: <%= number_to_currency @order.total %></h2>
+
+    <a href="<%= new_order_path %>">Make new order</a>
+  </div>
+</div>
