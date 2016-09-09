@@ -1,39 +1,41 @@
 <p id="notice"><%= notice %></p>
 
-<h1>Orders</h1>
-
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Created at</th>
-      <th colspan="2"></th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <% @orders.each do |order| %>
-      <tr>
-        <td><%= order.id %> <%= order.name %></td>
-        <td><%= order.created_at %></td>
-      </tr>
-      <tr>
-        <td>Plu</td>
-        <td>Units</td>
-      </tr>
-      <% order.order_items.each do |order_item| %>
-        <tr>
-          <td><%= order_item.plu.name %></td>
-          <td><%= order_item.units %></td>
-        </tr>
-      <% end %>
-      <tr>
-        <td colspan="2">
+<div class="row column">
+  <hr style="margin: 0">
+</div>
+<div class="row column">
+  <h1>In progress orders</h1>
+</div>
+<div class="row small-up-1 medium-up-2 large-up-3">
+  <% @orders.each do |order| %>
+    <div class="column">
+      <div class="callout js-order">
+        <h3><%= order.id %> <%= order.name %></h3>
+        <p>
+          <table>
+            <thead>
+              <tr>
+                <th>Plu</th>
+                <th>Units</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% order.order_items.each do |order_item| %>
+                <tr>
+                  <td><%= order_item.plu.name %></td>
+                  <td><%= order_item.units %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </p>
+        <p>Created on <%= ApplicationHelper.format_date_time order.created_at %> (<%= time_ago_in_words order.created_at %>)</p>
+        <p>
           <%= form_tag(order_serviced_path(order), method: :post) do  %>
-            <%= submit_tag 'Serviced' %>
+            <%= submit_tag 'Serviced', class: 'button hollow expanded'%>
           <% end %>
-        </td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+        </p>
+      </div>
+    </div>
+  <% end %>
+</div>
