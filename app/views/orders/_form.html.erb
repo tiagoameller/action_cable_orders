@@ -1,55 +1,80 @@
-<%= form_tag(orders_path, method: :post) do |f| %>
-  <% if order.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(order.errors.count, "error") %> prohibited this order from being saved:</h2>
-
-      <ul>
-      <% order.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
-      </ul>
-    </div>
-  <% end %>
-
-  <div class="field">
-    <%= label_tag 'Your name:' %>
-    <%= text_field_tag 'order[name]' %>
+  <div class="row">
+    <% if order.errors.any? %>
+      <div class="small-12-columns" id="error_explanation">
+        <h2><%= pluralize(order.errors.count, "error") %> prohibited this order from being saved:</h2>
+        <ul>
+          <% order.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Price</th>
-        <th colspan="3"></th>
-      </tr>
-    </thead>
+<%= form_tag(orders_path, method: :post) do |f| %>
+  <div class="row">
+    <div class="small-12-columns">
+      <%= text_field_tag 'order[name]', '',
+            class: 'field',
+            required: true,
+            placeholder: 'Please enter your name',
+            autofocus: true %>
+      <span class="form-error">
+        Name is required to identify your order
+      </span>
+    </div>
+  </div>
 
-    <tbody>
-      <% @plus.each do |plu| %>
-        <tr>
-          <td><%= plu.name %></td>
-          <td><%= plu.price %></td>
-          <td>
-            <button type="button" name="plus" id="js-plus-<%= plu.id %>" class='js-plus-btn'>+</button>
-          </td>
-          <td>
-            <button type="button" name="minus" id="js-minus-<%= plu.id %>" class='js-minus-btn'>-</button>
-          </td>
-          <td>
-            <%= number_field_tag(
-              "items[#{plu.id}]",
-              0,
-              id: "js-units-#{plu.id}",
-              class: 'js-units-btn',
-              min: 0) %>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+  <div class="row">
+    <div class="small-12-columns">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th colspan="3"></th>
+          </tr>
+        </thead>
 
-  <div class="actions">
-   <%= submit_tag 'Create Order' %>
+        <tbody>
+          <% @plus.each do |plu| %>
+            <tr>
+              <td><%= plu.name %></td>
+              <td><%= plu.price %></td>
+              <td class="action_button">
+                <a class="small success button js-plus-btn" id="js-plus-<%= plu.id %>">+</a>
+              </td>
+              <td class="action_button">
+                <a class="small alert button js-minus-btn" id="js-minus-<%= plu.id %>">-</a>
+              </td>
+              <td class="action_button">
+                <%= number_field_tag(
+                  "items[#{plu.id}]",
+                  0,
+                  required: true,
+                  patter: 'number',
+                  id: "js-units-#{plu.id}",
+                  class: 'js-units-input',
+                  'data-price': plu.price,
+                  min: 0) %>
+                  <span class="form-error">
+                    Please, enter a positive, integer number
+                  </span>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="small-12-columns">
+      <h2 id='js-total' class='text-right'>Total $0</h2>
+      <hr>
+      <div class="actions">
+       <%= submit_tag 'Send', class: 'button warning expanded', disabled: true, id: 'js-send-btn' %>
+      </div>
+    </div>
   </div>
 <% end %>

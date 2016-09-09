@@ -19,8 +19,18 @@ p {
 
 input[type="number"] {
   width: 36px;
+  margin: 0;
 }
 
 .row.column hr {
   margin: 0;
+}
+
+.button.small {
+  font-size: inherit;
+  margin: 0;
+}
+
+.action_button {
+  padding: 2px 2px 7px;
 }
