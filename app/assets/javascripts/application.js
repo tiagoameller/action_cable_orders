@@ -12,7 +12,10 @@
 //
 //= require jquery
 //= require jquery_ujs
+//= require foundation
 //= require turbolinks
 //= require action_cable
 //= require init
 //= require_tree ./orders
+
+$(function(){ $(document).foundation(); });
