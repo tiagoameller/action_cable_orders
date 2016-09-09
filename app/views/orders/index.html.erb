@@ -1,7 +1,5 @@
-<p id="notice"><%= notice %></p>
-
 <div class="row column">
-  <hr style="margin: 0">
+  <hr>
 </div>
 <div class="row column">
   <h1>In progress orders</h1>
@@ -12,28 +10,37 @@
       <div class="callout js-order">
         <h3><%= order.id %> <%= order.name %></h3>
         <p>
-          <table>
-            <thead>
-              <tr>
-                <th>Plu</th>
-                <th>Units</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% order.order_items.each do |order_item| %>
-                <tr>
-                  <td><%= order_item.plu.name %></td>
-                  <td><%= order_item.units %></td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
-        </p>
-        <p>Created on <%= ApplicationHelper.format_date_time order.created_at %> (<%= time_ago_in_words order.created_at %>)</p>
-        <p>
           <%= form_tag(order_serviced_path(order), method: :post) do  %>
-            <%= submit_tag 'Serviced', class: 'button hollow expanded'%>
+            <%= submit_tag 'Serviced', class: 'button expanded' %>
           <% end %>
+        </p>
+        <table class="hover">
+          <thead>
+            <tr>
+              <th>Plu</th>
+              <th>Units</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% order.order_items.each do |order_item| %>
+              <tr>
+                <td><%= order_item.plu.name %></td>
+                <td><%= order_item.units %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+        <p>
+          <div class="text-right">
+            <h3>
+              <%= number_to_currency order.total %>
+            </h3>
+          </div>
+        </p>
+        <p>
+          <h6 class="subheader">
+            Created on <%= ApplicationHelper.format_date_time order.created_at %> (<%= time_ago_in_words order.created_at %>)
+          </h6>
         </p>
       </div>
     </div>

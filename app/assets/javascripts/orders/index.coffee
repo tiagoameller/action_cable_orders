@@ -7,18 +7,7 @@ class App.OrdersIndex
         received: (data) -> location.reload() if data.kind == 'new_order'
       )
 
-  # var heights = $('.public.category').find('article.banner').map(function(index, item){
-  #   return $(item).width();
-  # });
-  #
-  # var max = 0;
-  # $(heights).each(function(index, item){
-  #   max = max < item ? item : max;
-  # });
-  #
-  # if(max < 20)
-  #   max = '90%';
-  #
-  # $('.no-content.banner').height(max);
-  #
-  #   $('.js-order').
+    heights = $('.js-order').map (index, item) -> $(item).height()
+    max = 0
+    $(heights).each (index, item) ->  if max < item then max = item
+    $('.js-order').height(max)
