@@ -52,6 +52,7 @@ Rails.application.configure do
   # routes, locales, etc. This feature depends on the listen gem.
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
 
-  config.action_cable.url = 'ws://192.168.1.174:3000/cable'
+  # config.action_cable.url = 'ws://192.168.1.174:3000/cable'
+  config.action_cable.url = 'ws://10.25.1.252:3000/cable'
   config.action_cable.disable_request_forgery_protection = true
 end

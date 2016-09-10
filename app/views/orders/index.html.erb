@@ -11,7 +11,7 @@
         <h3><%= order.id %> <%= order.name %></h3>
         <p>
           <%= form_tag(order_serviced_path(order), method: :post) do  %>
-            <%= submit_tag 'Serviced', class: 'button expanded' %>
+            <%= submit_tag 'Click here when order is ready to be serviced', class: 'button expanded' %>
           <% end %>
         </p>
         <table class="hover">
