@@ -1,0 +1,258 @@
+% disable rubocop in atom
+% open sublime in real project in other desktop
+
+rbenv shell 2.3.1
+rails new comesano
+cd comesano/
+rbenv local 2.3.1
+l
+edp
+
+% open Gemfile
+% uncomment redis gem
+# https://github.com/zurb/foundation-rails
+gem 'foundation-rails'
+% save
+
+bundle
+rails s
+% show server in browser
+% stop server
+
+g init
+cat .gitignore
+ga .
+gc 'first up and running'
+
+rails g scaffold plu name price:decimal  
+gs
+
+% open migration
+t.decimal :price, precision: 5, scale: 2, default: 0.0
+% open seeds.db
+Plu.create(name: 'Big Mac', price: 11.50)
+Plu.create(name: 'Cheeseburger', price: 11.50)
+Plu.create(name: 'File-O-Fish', price: 9.90)
+Plu.create(name: 'MacChicken', price: 11.3)
+Plu.create(name: '6 Chicken McNuggets', price: 9.90)
+
+rake db:migrate db:seed 
+
+rails c
+Plu.all
+exit
+
+% Gemfile, development, test
+# https://github.com/michaeldv/awesome_print
+gem 'awesome_print'
+
+bundle
+rails c
+ap Plu.all
+exit
+
+% opens another shell
+rails s
+http://localhost:3000/plus
+
+% opens routes
+rake routes
+
+% opens plu model
+validates :name, presence: true
+validates :price, numericality: { greater_than_or_equal_to: 0 }
+
+% main shell
+ga .
+gc 'add plu scaffold'     
+
+rails g model order name serviced:boolean
+% opens migration
+t.boolean :serviced, default: false
+
+rails g model order_item order:references plu:references units:integer
+% opens migration
+
+% opens order model
+  has_many :order_items, dependent: :destroy
+  has_many :plus, through: :order_items
+
+  validates :name, presence: true
+
+  scope :not_serviced, -> { where('serviced = ?', false) }
+
+  def total
+    order_items.inject(0) { |a, e| a + e.total }
+  end
+
+% opens order_item model
+  validates :plu, presence: true
+
+  after_initialize do |r|
+    r.units = 1 if new_record? && r.units.nil?
+  end
+
+  def total
+    return 0 unless plu.present?
+    plu.price * units
+  end
+
+% opens seeds
+order = Order.create(name: 'Juan')
+order.order_items.create(plu: Plu.first, units: 1)
+order.order_items.create(plu: Plu.second, units: 2)
+order = Order.create(name: 'Mateo')
+order.order_items.create(plu: Plu.second, units: 2)
+order = Order.create(name: 'Lucas')
+order.order_items.create(plu: Plu.third, units: 3)
+order = Order.create(name: 'Marcos')
+order.order_items.create(plu: Plu.third, units: 3)
+order.order_items.create(plu: Plu.last, units: 4)
+
+rake db:reset
+
+rc
+ap Order.all
+ap Order.last.order_items
+marcos = Order.last
+ap marcos.plus
+ap marcos.plus.map(&:name).join ', '
+ap marcos.plus.map(&:name).sort.join ', '
+ap marcos.order_items.inject(0){|total, element| total += element.total}
+
+ga. 
+gc 'create order and order item models'     
+
+rails g controller orders 
+% opens routes
+  root 'orders#new'
+
+  resources :plus
+  resources :orders, only: [:index, :new, :create, :show] do
+    post 'serviced'
+  end
+
+% opens orders_controller
+  def index
+    @orders = Order.not_serviced.order(:id)
+  end
+
+% copies views folder
+% copies assets folder
+% restart server
+
+% opens application_helper
+  def self.format_date_time(date_time)
+    date_time.present? ? I18n.l(date_time, format: '%d %b %H:%M') : 'undefined'
+  end
+
+http://localhost:3000/orders
+
+% rails c
+oo = Order.first
+oo.update_attributes(serviced: true)
+% refreshes browser
+
+% opens order_controller
+  def new
+    @order = Order.new
+    @plus = Plu.all
+  end
+
+http://localhost:3000/
+
+% opens order_controller
+  def serviced
+    @order = Order.find(params[:order_id])
+    ActionCable.server.broadcast(
+      'client_notifications',
+      kind: :serviced_order,
+      order_id: @order.id
+    )
+
+    @order.update_attributes(serviced: true)
+
+    @orders = Order.not_serviced.order(:id)
+    redirect_to orders_path
+  end
+
+% show service button is working
+% return to orders controller
+  def create
+    @order = Order.new(order_params)
+    respond_to do |format|
+      if @order.save
+
+        params[:items].each do |k, v|
+          @order.order_items.create(plu: Plu.find(k.to_i), units: v.to_i) unless v == '0'
+        end
+
+        ActionCable.server.broadcast(
+          'server_notifications',
+          kind: :new_order,
+          order_id: @order.id
+        )
+
+        format.html { redirect_to @order, notice: 'Order was successfully created.' }
+        format.json { render :show, status: :created, location: @order }
+      else
+        @plus = Plu.all
+        format.html { render :new }
+        format.json { render json: @order.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  def show
+    @order = Order.find(params[:id])
+  end
+
+  private
+
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def order_params
+    params.require(:order).permit(:name)
+  end
+
+% creates an order. Works but do not update orders index
+
+ga . 
+gc 'add views and assets to orders'   
+
+% action cable 
+create new file in app/channels -> client_notifications_channel.rb
+class ClientNotificationsChannel < ApplicationCable::Channel
+  def subscribed
+    stream_from 'client_notifications'
+  end
+end
+
+create new file in app/channels -> server_notifications_channel.rb
+class ServerNotificationsChannel < ApplicationCable::Channel
+  def subscribed
+    stream_from 'server_notifications'
+  end
+end
+
+config/environment/development.rb
+config.action_cable.url = 'ws://localhost:3000/cable'
+
+% stop server
+redis-server
+rails server
+
+% show time
+
+% where is the magic?
+app/views/layouts/application.html.erb
+app/assets/javascripts/cable.js
+app/assets/javascripts/init.js
+app/assets/javascripts/orders/*.coffee
+
+ga .
+gc 'add cable notifications'  
+
+
+
+
+
