@@ -12,10 +12,7 @@
 
 ActiveRecord::Schema.define(version: 20160905170514) do
 
-  # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
-
-  create_table "order_items", force: :cascade do |t|
+  create_table "order_items", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer  "order_id"
     t.integer  "plu_id"
     t.integer  "units"
@@ -25,14 +22,14 @@ ActiveRecord::Schema.define(version: 20160905170514) do
     t.index ["plu_id"], name: "index_order_items_on_plu_id", using: :btree
   end
 
-  create_table "orders", force: :cascade do |t|
+  create_table "orders", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string   "name"
     t.boolean  "serviced",   default: false
     t.datetime "created_at",                 null: false
     t.datetime "updated_at",                 null: false
   end
 
-  create_table "plus", force: :cascade do |t|
+  create_table "plus", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string   "name"
     t.decimal  "price",      precision: 5, scale: 2, default: "0.0"
     t.datetime "created_at",                                         null: false
