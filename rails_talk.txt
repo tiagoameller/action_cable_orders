@@ -109,7 +109,7 @@ order = Order.create(name: 'Marcos')
 order.order_items.create(plu: Plu.third, units: 3)
 order.order_items.create(plu: Plu.last, units: 4)
 
-rake db:reset
+rake db:migrate db:reset
 
 rc
 ap Order.all
