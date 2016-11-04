@@ -13,19 +13,19 @@ Vagrant.configure('2') do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
-  config.vm.box = 'trusty32'
-  config.vm.box_url = '/mnt/vm/32bits/package.box'
+  config.vm.box = 'ubuntu/trusty32'
 
   # Configurate the virtual machine to use 2GB of RAM
   config.vm.provider :virtualbox do |vb|
     vb.memory = 1024
     ### Change network card to PCnet-FAST III
     # For NAT adapter
-    vb.customize ['modifyvm', :id, '--nictype1', 'Am79C973']
+    vb.customize ["modifyvm", :id, "--nictype1", "Am79C973"]
   end
 
   # Forward the Rails server default port to the host
   config.vm.network :forwarded_port, guest: 3000, host: 3010
+  config.vm.network :forwarded_port, guest: 3306, host: 4406
   config.vm.network :forwarded_port, guest: 80, host: 8080
   # config.vm.network :private_network, ip: '192.168.66.66'
   config.ssh.forward_agent = true
@@ -75,13 +75,34 @@ Vagrant.configure('2') do |config|
     SCRIPT
 
   provision_shell_mysql = <<-SCRIPT
-    echo ############################# postgresql #############################
-    sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password'
-    sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password'
+    echo ############################# mysql #############################
+    sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password rails'
+    sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password rails'
     sudo apt-get --yes install mysql-server mysql-client libmysqlclient-dev
-    mysql -u root -e "create user 'rails'@'localhost' identified by 'rails';"
-    mysql -u root -e "grant all on *.* to 'rails'@'localhost';"
-    # for access from host, see: http://serverfault.com/questions/366532/opening-port-3306-for-remote-mysql-from-vm
+	# grant access from outside VM
+    sudo sed -i -- 's/127.0.0.1/0.0.0.0/g' /etc/mysql/my.cnf	
+	sudo /etc/init.d/mysql restart
+    mysql -u root -prails -e "create user 'rails'@'%' identified by 'rails';"
+    mysql -u root -prails -e "grant all on *.* to 'rails'@'%' identified by 'rails';"
+  SCRIPT
+
+  provision_shell_app = <<-SCRIPT
+    echo ############################# app #############################
+	cd /vagrant/action_cable_orders
+	bundle
+	bundle exec RAILS_ENV=production rake db:create db:migrate db:seed
+	
+	# here we are: https://gorails.com/deploy/ubuntu/16.04
+	# better use passenger than puma
+	# or unicorn: https://www.digitalocean.com/community/tutorials/how-to-deploy-a-rails-app-with-unicorn-and-nginx-on-ubuntu-14-04
+		
+	# mkdir -p shared/pids shared/sockets shared/log
+	# cd ~
+	# wget https://raw.githubusercontent.com/puma/puma/master/tools/jungle/upstart/puma-manager.conf
+	# wget https://raw.githubusercontent.com/puma/puma/master/tools/jungle/upstart/puma.conf
+	# sed -i -- 's/id apps/id rails/g' puma.conf
+	# sudo cp puma.conf puma-manager.conf /etc/init
+	# echo "/vagrant/action_cable_orders" | sudo tee --append /etc/puma.conf
   SCRIPT
 
   # provision_shell_postgresql = <<-SCRIPT
@@ -99,8 +120,8 @@ Vagrant.configure('2') do |config|
   # SCRIPT
   #
 
-  config.vm.provision 'shell', inline: provision_shell_root
-  config.vm.provision 'shell', inline: provision_shell_user, privileged: false
+  #config.vm.provision 'shell', inline: provision_shell_root
+  #config.vm.provision 'shell', inline: provision_shell_user, privileged: false
   config.vm.provision 'shell', inline: provision_shell_mysql
   # config.vm.provision 'shell', inline: provision_shell_postgresql
 
