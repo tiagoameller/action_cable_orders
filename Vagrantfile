@@ -20,7 +20,7 @@ Vagrant.configure('2') do |config|
     vb.memory = 1024
     ### Change network card to PCnet-FAST III
     # For NAT adapter
-    vb.customize ["modifyvm", :id, "--nictype1", "Am79C973"]
+    vb.customize ['modifyvm', :id, '--nictype1', 'Am79C973']
   end
 
   # Forward the Rails server default port to the host
@@ -32,18 +32,20 @@ Vagrant.configure('2') do |config|
   config.ssh.username = 'vagrant'
   config.ssh.password = 'vagrant'
 
+  script_env = { APP_NAME: 'comesano' }
+
   provision_shell_root = <<-SCRIPT
     apt-get update
     sudo apt-get --yes install git-core curl zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev libcurl4-openssl-dev python-software-properties libffi-dev htop
   SCRIPT
 
   provision_shell_user = <<-SCRIPT
-    echo ############################# node.js #############################
+    ################################# node.js #############################
     curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
     sudo apt-get install -y nodejs
     cd
 
-    echo ############################# rbenv #############################
+    ################################# rbenv #############################
     cd
     git clone https://github.com/rbenv/rbenv.git ~/.rbenv
     echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc
@@ -57,17 +59,17 @@ Vagrant.configure('2') do |config|
 
     export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"
 
-    echo ############################# ruby 2.3.1 #############################
+    ################################# ruby 2.3.1 #############################
     rbenv install 2.3.1
     rbenv global 2.3.1
     ruby -v
 
-    echo ############################# bundler #############################
+    ################################# bundler #############################
     gem update --system
     yes | gem update
     gem install bundler
 
-    echo ############################# rails #############################
+    ################################# rails #############################
     gem install rails
     rbenv rehash
     rails -v
@@ -75,38 +77,45 @@ Vagrant.configure('2') do |config|
     SCRIPT
 
   provision_shell_mysql = <<-SCRIPT
-    echo ############################# mysql #############################
+    ################################# mysql #############################
     sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password rails'
     sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password rails'
     sudo apt-get --yes install mysql-server mysql-client libmysqlclient-dev
-	# grant access from outside VM
-    sudo sed -i -- 's/127.0.0.1/0.0.0.0/g' /etc/mysql/my.cnf	
-	sudo /etc/init.d/mysql restart
+    # grant access from outside VM
+    sudo sed -i -- 's/127.0.0.1/0.0.0.0/g' /etc/mysql/my.cnf
+    sudo /etc/init.d/mysql restart
     mysql -u root -prails -e "create user 'rails'@'%' identified by 'rails';"
     mysql -u root -prails -e "grant all on *.* to 'rails'@'%' identified by 'rails';"
   SCRIPT
 
   provision_shell_app = <<-SCRIPT
-    echo ############################# app #############################
-	cd /vagrant/action_cable_orders
-	bundle
-	bundle exec RAILS_ENV=production rake db:create db:migrate db:seed
-	
-	# here we are: https://gorails.com/deploy/ubuntu/16.04
-	# better use passenger than puma
-	# or unicorn: https://www.digitalocean.com/community/tutorials/how-to-deploy-a-rails-app-with-unicorn-and-nginx-on-ubuntu-14-04
-		
-	# mkdir -p shared/pids shared/sockets shared/log
-	# cd ~
-	# wget https://raw.githubusercontent.com/puma/puma/master/tools/jungle/upstart/puma-manager.conf
-	# wget https://raw.githubusercontent.com/puma/puma/master/tools/jungle/upstart/puma.conf
-	# sed -i -- 's/id apps/id rails/g' puma.conf
-	# sudo cp puma.conf puma-manager.conf /etc/init
-	# echo "/vagrant/action_cable_orders" | sudo tee --append /etc/puma.conf
+    ################################# app #############################
+    cd /vagrant/$APP_NAME
+    export PATH=$PATH:/home/vagrant/.rbenv/shims/
+    bundle install
+    bundle update
+    export SECRET_KEY_BASE=`rake secret`
+    echo "SECRET_KEY_BASE=\"$SECRET_KEY_BASE"\" | sudo tee --append /etc/environment
+    RAILS_ENV=production rake db:create db:migrate db:seed
+  SCRIPT
+
+  provision_shell_production_server = <<-SCRIPT
+    ################################# app #############################
+    # here we are: https://gorails.com/deploy/ubuntu/16.04
+    # better use passenger than puma
+    # or unicorn: https://www.digitalocean.com/community/tutorials/how-to-deploy-a-rails-app-with-unicorn-and-nginx-on-ubuntu-14-04
+
+    # mkdir -p shared/pids shared/sockets shared/log
+    # cd ~
+    # wget https://raw.githubusercontent.com/puma/puma/master/tools/jungle/upstart/puma-manager.conf
+    # wget https://raw.githubusercontent.com/puma/puma/master/tools/jungle/upstart/puma.conf
+    # sed -i -- 's/id apps/id rails/g' puma.conf
+    # sudo cp puma.conf puma-manager.conf /etc/init
+    # echo "/vagrant/$APP_NAME" | sudo tee --append /etc/puma.conf
   SCRIPT
 
   # provision_shell_postgresql = <<-SCRIPT
-  #   echo ############################# postgresql #############################
+  #   ################################# postgresql #############################
   #   sudo locale-gen es_ES.UTF-8
   #   sudo sh -c "echo 'deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main' > /etc/apt/sources.list.d/pgdg.list"
   #   wget --quiet -O - http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc | sudo apt-key add -
@@ -120,10 +129,13 @@ Vagrant.configure('2') do |config|
   # SCRIPT
   #
 
-  #config.vm.provision 'shell', inline: provision_shell_root
-  #config.vm.provision 'shell', inline: provision_shell_user, privileged: false
-  config.vm.provision 'shell', inline: provision_shell_mysql
-  # config.vm.provision 'shell', inline: provision_shell_postgresql
+  # config.vm.provision 'shell', inline: provision_shell_root, name: 'PROVISION_SHELL_ROOT', env: script_env
+  # config.vm.provision 'shell', inline: provision_shell_user, name: 'PROVISION_SHELL_USER', env: script_env, privileged: false
+  # config.vm.provision 'shell', inline: provision_shell_mysql, name: 'PROVISION_SHELL_MYSQL', env: script_env
+  # config.vm.provision 'shell', inline: provision_shell_app, name: 'PROVISION_SHELL_APP', env: script_env, privileged: false
+  config.vm.provision 'shell', inline: provision_shell_production_server, name: 'PROVISION_SHELL_PRODUCTION_SERVER', env: script_env
+
+  # config.vm.provision 'shell', inline: provision_shell_postgresql, name: 'PROVISION_SHELL_POSTGRESQL', env: script_env
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs

@@ -17,4 +17,3 @@ test:
 production:
   <<: *default
   database: ac_orders_production
-  username: rails
