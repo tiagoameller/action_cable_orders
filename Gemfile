@@ -5,8 +5,8 @@ gem 'rails', '~> 5.0.0', '>= 5.0.0.1'
 # # use postgresql
 # gem 'pg'
 gem 'mysql2'
-# Use Puma as the app server
-gem 'puma', '~> 3.0'
+# Use Unicorn as the production server
+gem 'unicorn', group: :production
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0'
 # Use Uglifier as compressor for JavaScript assets
@@ -34,6 +34,8 @@ gem 'foundation-rails'
 # gem 'capistrano-rails', group: :development
 
 group :development, :test do
+  # Use Puma as the development and test server
+  gem 'puma', '~> 3.0'
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platform: :mri
 end

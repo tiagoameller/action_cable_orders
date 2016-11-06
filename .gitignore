@@ -19,3 +19,7 @@
 
 # Ignore Byebug command history file.
 .byebug_history
+
+# When in a vagrant box, this is a production machine
+/shared/*
+/public/*
