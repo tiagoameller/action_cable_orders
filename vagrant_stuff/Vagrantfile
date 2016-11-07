@@ -21,9 +21,13 @@
 # `vagrant up`
 #
 # Optional parameters, before vagrant up:
-# APP_NAME
-# DB_USER
-# DB_PASSWORD
+# APP_NAME    # aplication name, application directory: /vagrant/<app_name>
+# DB_USER     # database.yml database user. Festricted for localhost
+# DB_PASSWORD # database.yml database password. Same for external user 'host'
+#
+# MySQL access from host can be done by user 'host' with same password. Host access is restricted to host ip (10.0.2.2)
+#
+# Windows host. Configure firewall opening only port 8080. SSH 2222, mysql 4406 and rails 3010 must be closed.
 #
 ##############################################################################################################################
 
@@ -36,11 +40,9 @@ Vagrant.configure('2') do |config|
   # For a complete reference, please see the online documentation at
   # https://docs.vagrantup.com.
 
-  # Every Vagrant development environment requires a box. You can search for
-  # boxes at https://atlas.hashicorp.com/search.
+  # You can search for boxes at https://atlas.hashicorp.com/search.
   config.vm.box = 'ubuntu/trusty32'
 
-  # Configurate the virtual machine to use 2GB of RAM
   config.vm.provider :virtualbox do |vb|
     vb.memory = 1024
     ### Change network card to PCnet-FAST III
@@ -53,9 +55,9 @@ Vagrant.configure('2') do |config|
   end
 
   # Forward the Rails server default port to the host
-  config.vm.network :forwarded_port, guest: 3000, host: 3010
-  config.vm.network :forwarded_port, guest: 3306, host: 4406
-  config.vm.network :forwarded_port, guest: 80, host: 8080
+  config.vm.network :forwarded_port, guest: 3000, host: 3010 # closed in firewall
+  config.vm.network :forwarded_port, guest: 3306, host: 4406 # closed in firewall
+  config.vm.network :forwarded_port, guest: 80,   host: 8080 # only open this port for other machines access
   config.ssh.forward_agent = true
   # default user/password credentials
   config.ssh.username = 'vagrant'
@@ -124,8 +126,10 @@ Vagrant.configure('2') do |config|
     # grant access from outside VM
     sudo sed -i -- 's/127.0.0.1/0.0.0.0/g' /etc/mysql/my.cnf
     sudo /etc/init.d/mysql restart
-    mysql -u root -p$DB_PASSWORD -e "create user '$DB_USER'@'%' identified by '$DB_PASSWORD';"
-    mysql -u root -p$DB_PASSWORD -e "grant all on *.* to '$DB_USER'@'%' identified by '$DB_PASSWORD';"
+    mysql -u root -p$DB_PASSWORD -e "create user '$DB_USER'@'localhost' identified by '$DB_PASSWORD';"
+    mysql -u root -p$DB_PASSWORD -e "grant all on *.* to '$DB_USER'@'localhost' identified by '$DB_PASSWORD';"
+    mysql -u root -p$DB_PASSWORD -e "create user 'host'@'10.0.2.2' identified by '$DB_PASSWORD';"
+    mysql -u root -p$DB_PASSWORD -e "grant all on *.* to 'host'@'10.0.2.2' identified by '$DB_PASSWORD';"
   SCRIPT
 
   provision_shell_app = <<-SCRIPT
@@ -168,22 +172,23 @@ Vagrant.configure('2') do |config|
 
   config.vm.provision 'shell', inline: provision_shell_root, name: 'PROVISION_SHELL_ROOT', env: script_env
   # configure oh-my-shell
-  config.vm.provision :shell, inline: "git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh", privileged: false
-  config.vm.provision :shell, inline: "cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc", privileged: false
+  config.vm.provision :shell, inline: 'git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh', privileged: false
+  config.vm.provision :shell, inline: 'cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc', privileged: false
   config.vm.provision :shell, inline: "echo 'export PATH=\"$HOME/.rbenv/bin:$PATH\"' >> ~/.zshrc", privileged: false
   config.vm.provision :shell, inline: "echo 'eval \"$(rbenv init -)\"' >> ~/.zshrc", privileged: false
   config.vm.provision :shell, inline: "echo 'export PATH=\"$HOME/.rbenv/plugins/ruby-build/bin:$PATH\"' >> ~/.zshrc", privileged: false
-  config.vm.provision :shell, inline: "chsh -s /bin/zsh vagrant"
+  config.vm.provision :shell, inline: 'chsh -s /bin/zsh vagrant'
   # continue installing stuff
   config.vm.provision 'shell', inline: provision_shell_user, name: 'PROVISION_SHELL_USER', env: script_env, privileged: false
   config.vm.provision 'shell', inline: provision_shell_mysql, name: 'PROVISION_SHELL_MYSQL', env: script_env
   config.vm.provision 'shell', inline: provision_shell_app, name: 'PROVISION_SHELL_APP', env: script_env, privileged: false
-  config.vm.provision 'file', source: 'unicorn_init', destination: '/home/vagrant/tmp/unicorn_init'
-  config.vm.provision 'shell', inline: provision_shell_unicorn, name: 'PROVISION_SHELL_UNICORN', env: script_env
-  config.vm.provision 'file', source: 'nginx_sites_available', destination: '/home/vagrant/tmp/nginx_sites_available'
-  config.vm.provision 'shell', inline: provision_shell_nginx, name: 'PROVISION_SHELL_NGINX', env: script_env
+  config.vm.provision :file, source: 'unicorn_init', destination: '/home/vagrant/tmp/unicorn_init'
+  config.vm.provision :shell, inline: provision_shell_unicorn, name: 'PROVISION_SHELL_UNICORN', env: script_env
+  config.vm.provision :file, source: 'nginx_sites_available', destination: '/home/vagrant/tmp/nginx_sites_available'
+  config.vm.provision :shell, inline: provision_shell_nginx, name: 'PROVISION_SHELL_NGINX', env: script_env
+  config.vm.provision :shell, inline: 'apt-get --yes autoremove'
   # important: due services are started before shared folders are mounted, we need to start it again by a provision
-  config.vm.provision 'shell', inline: "sudo service unicorn_#{app_name} start", name: 'unicorn after shared folders mounted', run: :always
+  config.vm.provision :shell, inline: "sudo service unicorn_#{app_name} start", name: 'unicorn after shared folders mounted', run: :always
 
   ###############################################
   # Left here for your info: postgresql version #
@@ -202,6 +207,10 @@ Vagrant.configure('2') do |config|
   #   sudo -u postgres psql -c "ALTER USER ubuntu WITH PASSWORD 'ubuntu';"
   # SCRIPT
   # config.vm.provision 'shell', inline: provision_shell_postgresql, name: 'PROVISION_SHELL_POSTGRESQL', env: script_env
+
+  #############################################################
+  # Default vagrant comments. You can learn something from them
+  #############################################################
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
