@@ -170,6 +170,9 @@ Vagrant.configure('2') do |config|
   # configure oh-my-shell
   config.vm.provision :shell, inline: "git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh", privileged: false
   config.vm.provision :shell, inline: "cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc", privileged: false
+  config.vm.provision :shell, inline: "echo 'export PATH=\"$HOME/.rbenv/bin:$PATH\"' >> ~/.zshrc", privileged: false
+  config.vm.provision :shell, inline: "echo 'eval \"$(rbenv init -)\"' >> ~/.zshrc", privileged: false
+  config.vm.provision :shell, inline: "echo 'export PATH=\"$HOME/.rbenv/plugins/ruby-build/bin:$PATH\"' >> ~/.zshrc", privileged: false
   config.vm.provision :shell, inline: "chsh -s /bin/zsh vagrant"
   # continue installing stuff
   config.vm.provision 'shell', inline: provision_shell_user, name: 'PROVISION_SHELL_USER', env: script_env, privileged: false
