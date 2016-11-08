@@ -82,11 +82,12 @@ Vagrant.configure('2') do |config|
 
     ################################# rbenv #############################
     cd
-    mkdir -p tmp/sockets
+	# http://stackoverflow.com/questions/16388342/unicorn-fails-to-start-on-vagrant-box-due-to-errnoeperm
+    mkdir -p $APP_NAME/shared/pids $APP_NAME/shared/sockets $APP_NAME/shared/log
     git clone https://github.com/rbenv/rbenv.git ~/.rbenv
     echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc
     # http://stackoverflow.com/questions/29813764/su-bundle-command-not-found-when-starting-unicorn
-    echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.profile
+    echo 'export PATH="$HOME/.rbenv/shims:$HOME/.rbenv/bin:$PATH"' >> ~/.profile
     echo 'eval "$(rbenv init -)"' >> ~/.bashrc
 
     export PATH="$HOME/.rbenv/bin:$PATH"
@@ -135,6 +136,9 @@ Vagrant.configure('2') do |config|
   provision_shell_app = <<-SCRIPT
     ################################# app #############################
     cd /vagrant/$APP_NAME
+    cp /home/vagrant/tmp/unicorn.rb /vagrant/$APP_NAME/config/unicorn.rb
+	sed -i -- "s/app_name_here/$APP_NAME/g" /vagrant/$APP_NAME/config/unicorn.rb
+	
     export PATH=$PATH:/home/vagrant/.rbenv/shims/
     bundle install
     bundle update
@@ -144,8 +148,6 @@ Vagrant.configure('2') do |config|
 
     RAILS_ENV=production rake db:create db:migrate db:seed
     RAILS_ENV=production rake assets:precompile
-
-    mkdir -p shared/pids shared/sockets shared/log
   SCRIPT
 
   provision_shell_unicorn = <<-SCRIPT
@@ -170,7 +172,7 @@ Vagrant.configure('2') do |config|
   # Advice: comment all provisions but one, execute it. If all is ok, take a snapshot of the VM and run next provision
   ####################################################################################################################
 
-  config.vm.provision 'shell', inline: provision_shell_root, name: 'PROVISION_SHELL_ROOT', env: script_env
+  config.vm.provision :shell, inline: provision_shell_root, name: 'PROVISION_SHELL_ROOT', env: script_env
   # configure oh-my-shell
   config.vm.provision :shell, inline: 'git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh', privileged: false
   config.vm.provision :shell, inline: 'cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc', privileged: false
@@ -179,9 +181,10 @@ Vagrant.configure('2') do |config|
   config.vm.provision :shell, inline: "echo 'export PATH=\"$HOME/.rbenv/plugins/ruby-build/bin:$PATH\"' >> ~/.zshrc", privileged: false
   config.vm.provision :shell, inline: 'chsh -s /bin/zsh vagrant'
   # continue installing stuff
-  config.vm.provision 'shell', inline: provision_shell_user, name: 'PROVISION_SHELL_USER', env: script_env, privileged: false
-  config.vm.provision 'shell', inline: provision_shell_mysql, name: 'PROVISION_SHELL_MYSQL', env: script_env
-  config.vm.provision 'shell', inline: provision_shell_app, name: 'PROVISION_SHELL_APP', env: script_env, privileged: false
+  config.vm.provision :shell, inline: provision_shell_user, name: 'PROVISION_SHELL_USER', env: script_env, privileged: false
+  config.vm.provision :shell, inline: provision_shell_mysql, name: 'PROVISION_SHELL_MYSQL', env: script_env
+  config.vm.provision :file, source: 'unicorn.rb', destination: '/home/vagrant/tmp/unicorn.rb'
+  config.vm.provision :shell, inline: provision_shell_app, name: 'PROVISION_SHELL_APP', env: script_env, privileged: false
   config.vm.provision :file, source: 'unicorn_init', destination: '/home/vagrant/tmp/unicorn_init'
   config.vm.provision :shell, inline: provision_shell_unicorn, name: 'PROVISION_SHELL_UNICORN', env: script_env
   config.vm.provision :file, source: 'nginx_sites_available', destination: '/home/vagrant/tmp/nginx_sites_available'

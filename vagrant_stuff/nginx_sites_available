@@ -1,7 +1,7 @@
 upstream app {
     # Path to Unicorn SOCK file, as defined previously
     # http://stackoverflow.com/questions/16388342/unicorn-fails-to-start-on-vagrant-box-due-to-errnoeperm
-    server unix:/home/vagrant/tmp/sockets/unicorn.sock fail_timeout=0;
+    server unix:/home/vagrant/app_name_here/shared/sockets/unicorn.sock fail_timeout=0;
 }
 
 server {
