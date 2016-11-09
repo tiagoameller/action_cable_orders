@@ -22,4 +22,5 @@
 
 # When in a vagrant box, this is a production machine
 /shared/*
-/public/*
+# to move a ready to production box, public assets must be available
+# /public/*
