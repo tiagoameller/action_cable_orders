@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   root 'orders#new'
+  get 'version' => 'application#version'
 
   mount ActionCable.server => '/cable'
 
