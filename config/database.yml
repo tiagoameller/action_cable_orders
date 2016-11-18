@@ -2,6 +2,8 @@ default: &default
   adapter: mysql2
   username: <%= ENV['DB_USER'] %>
   password: <%= ENV['DB_PASSWORD'] %>
+  host: 127.0.0.1
+  port: 3306
   # For details on connection pooling, see rails configuration guide
   # http://guides.rubyonrails.org/configuring.html#database-pooling
   pool: 5
