@@ -45,7 +45,7 @@ class OrdersController < ApplicationController
       order_id: @order.id
     )
 
-    @order.update_attributes(serviced: true)
+    @order.update(serviced: true)
 
     @orders = Order.not_serviced.order(:id)
     redirect_to orders_path
